@@ -76,7 +76,7 @@
     100% { fill: #ff4fa3; }
   }
 
-  /* Sao nhấp nháy tự nhiên */
+  /* Sao nhấp nháy */
   .star {
     position: absolute;
     border-radius: 50%;
@@ -102,6 +102,44 @@
     from { transform: translate(0,0) scale(0.8); opacity: 1; }
     to   { transform: translate(var(--dx), var(--dy)) scale(2.5); opacity: 0; }
   }
+
+  /* Thanh tiến trình */
+  .progress-horizontal {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 40px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.1);
+    z-index: 10;
+  }
+  .progress-horizontal .progress-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00c6ff, #ff4fa3);
+    transition: width 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+    text-shadow: 0 0 5px black;
+  }
+  /* Lấp lánh khi đầy */
+  .progress-horizontal.full .progress-fill {
+    animation: sparkle 1s infinite alternate;
+  }
+  @keyframes sparkle {
+    0%   { box-shadow: 0 0 10px #fff, 0 0 20px #ff4fa3; }
+    100% { box-shadow: 0 0 20px #00c6ff, 0 0 40px #ff66b2; }
+  }
 </style>
 </head>
 <body>
@@ -114,7 +152,19 @@
     </svg>
   </a>
 
+  <!-- Thanh tiến trình -->
+  <div class="progress-horizontal" id="progress-bar">
+    <div id="progress-fill" class="progress-fill">
+      <span id="progress-text">0%</span>
+    </div>
+  </div>
+
   <script>
+    let progress = 0;
+    const progressFill = document.getElementById("progress-fill");
+    const progressText = document.getElementById("progress-text");
+    const progressBar = document.getElementById("progress-bar");
+
     /* Trái tim rơi */
     function createHeart() {
       const heart = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -138,9 +188,10 @@
       heart.style.animation = `fallBeat ${duration}s linear forwards`;
       path.style.animation = `colorShift ${duration}s linear forwards`;
 
-      /* Khi click -> nổ thành nhiều tim nhỏ */
+      /* Khi click -> nổ + tăng % */
       heart.addEventListener("click", (e) => {
         explodeHeart(e.clientX, e.clientY, size);
+        increaseProgress();
         heart.remove();
       });
 
@@ -164,7 +215,6 @@
         path.setAttribute("fill", "#ff4fa3");
         mini.appendChild(path);
 
-        // random hướng bay
         const angle = Math.random() * 2 * Math.PI;
         const distance = Math.random() * (size * 2.5);
         const dx = Math.cos(angle) * distance + "px";
@@ -177,7 +227,7 @@
       }
     }
 
-    /* Sao nhấp nháy tự nhiên */
+    /* Sao nhấp nháy */
     function createStars(count) {
       const colors = ["#ffffff", "#ffe9a9", "#aee7ff", "#ffd6f5"];
       for (let i = 0; i < count; i++) {
@@ -190,13 +240,24 @@
         star.style.top = Math.random() * window.innerHeight + "px";
         star.style.background = colors[Math.floor(Math.random() * colors.length)];
 
-        // mỗi sao có tốc độ và nhịp sáng khác nhau
-        const duration = (Math.random() * 4 + 2).toFixed(1); // 2s - 6s
-        const delay = (Math.random() * 5).toFixed(1);        // trễ ngẫu nhiên
+        const duration = (Math.random() * 4 + 2).toFixed(1);
+        const delay = (Math.random() * 5).toFixed(1);
         star.style.animationDuration = duration + "s";
         star.style.animationDelay = delay + "s";
 
         document.body.appendChild(star);
+      }
+    }
+
+    /* Thanh tiến trình */
+    function increaseProgress() {
+      if (progress < 100) {
+        progress++;
+        progressFill.style.width = progress + "%";
+        progressText.textContent = progress + "%";
+      }
+      if (progress === 100) {
+        progressBar.classList.add("full");
       }
     }
 
