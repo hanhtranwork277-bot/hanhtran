@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<title>Hạnh Trần</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #020111 0%, #000 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  h1 {
+    margin: 20px 0;
+    font-size: 3em;
+    font-weight: bold;
+    background: linear-gradient(270deg, #00c6ff, #ff4fa3);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 1s ease infinite, beat 1.8s ease-in-out infinite;
+    z-index: 5;
+  }
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+  }
+  @keyframes beat {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .fb {
+    margin-top: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .3s, box-shadow .3s;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .fb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(24, 119, 242, 0.7);
+  }
+  .fb svg { width: 80px; height: 80px; }
+
+  .heart {
+    position: absolute;
+    top: -10%;
+    opacity: 0.9;
+    will-change: transform;
+    cursor: pointer;
+    z-index: 2;
+  }
+  @keyframes fallBeat {
+    0%   { transform: translateY(-10%) scale(1); }
+    25%  { transform: translateY(25vh) scale(1.3); }
+    50%  { transform: translateY(50vh) scale(1); }
+    75%  { transform: translateY(75vh) scale(1.3); }
+    100% { transform: translateY(110vh) scale(1); }
+  }
+  @keyframes colorShift {
+    0%   { fill: #00c6ff; }
+    50%  { fill: #ff66b2; }
+    100% { fill: #ff4fa3; }
+  }
+
+  /* Sao nhấp nháy tự nhiên */
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+    animation: twinkle 3s infinite ease-in-out;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.8); }
+    50%      { opacity: 1; transform: scale(1.2); }
+  }
+
+  /* Trái tim nổ */
+  .mini-heart {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    opacity: 0.9;
+    pointer-events: none;
+    animation: explodeHeart 1.2s ease-out forwards;
+  }
+  @keyframes explodeHeart {
+    from { transform: translate(0,0) scale(0.8); opacity: 1; }
+    to   { transform: translate(var(--dx), var(--dy)) scale(2.5); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <h1>Hạnh Trần</h1>
+  <a href="https://www.facebook.com/hanhtran277" target="_blank" class="fb" aria-label="Facebook">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <circle cx="256" cy="256" r="256" fill="#1877f2"/>
+      <path fill="#fff" d="M336 256h-48v144h-72V256h-36v-60h36v-36c0-49 29-76 73-76
+        21 0 43 4 43 4v47h-24c-24 0-31 15-31 30v31h53l-8 60z"/>
+    </svg>
+  </a>
+
+  <script>
+    /* Trái tim rơi */
+    function createHeart() {
+      const heart = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      heart.setAttribute("viewBox", "0 0 24 24");
+      heart.setAttribute("class", "heart");
+      heart.style.left = Math.random() * window.innerWidth + "px";
+      const size = Math.random() * 30 + 15;
+      heart.style.width = size + "px";
+      heart.style.height = size + "px";
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 \
+        2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 \
+        19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z");
+      path.setAttribute("fill", "#00c6ff");
+
+      heart.appendChild(path);
+      document.body.appendChild(heart);
+
+      const duration = Math.random() * 5 + 5;
+      heart.style.animation = `fallBeat ${duration}s linear forwards`;
+      path.style.animation = `colorShift ${duration}s linear forwards`;
+
+      /* Khi click -> nổ thành nhiều tim nhỏ */
+      heart.addEventListener("click", (e) => {
+        explodeHeart(e.clientX, e.clientY, size);
+        heart.remove();
+      });
+
+      setTimeout(() => heart.remove(), duration * 1000);
+    }
+
+    /* Tạo vụ nổ bằng nhiều trái tim nhỏ */
+    function explodeHeart(x, y, size) {
+      const particles = 15; 
+      for (let i = 0; i < particles; i++) {
+        const mini = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        mini.setAttribute("viewBox", "0 0 24 24");
+        mini.classList.add("mini-heart");
+        mini.style.left = x + "px";
+        mini.style.top = y + "px";
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 \
+          2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 \
+          19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z");
+        path.setAttribute("fill", "#ff4fa3");
+        mini.appendChild(path);
+
+        // random hướng bay
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = Math.random() * (size * 2.5);
+        const dx = Math.cos(angle) * distance + "px";
+        const dy = Math.sin(angle) * distance + "px";
+        mini.style.setProperty("--dx", dx);
+        mini.style.setProperty("--dy", dy);
+
+        document.body.appendChild(mini);
+        setTimeout(() => mini.remove(), 1200);
+      }
+    }
+
+    /* Sao nhấp nháy tự nhiên */
+    function createStars(count) {
+      const colors = ["#ffffff", "#ffe9a9", "#aee7ff", "#ffd6f5"];
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        const size = Math.random() * 3 + 1;
+        star.style.width = size + "px";
+        star.style.height = size + "px";
+        star.style.left = Math.random() * window.innerWidth + "px";
+        star.style.top = Math.random() * window.innerHeight + "px";
+        star.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+        // mỗi sao có tốc độ và nhịp sáng khác nhau
+        const duration = (Math.random() * 4 + 2).toFixed(1); // 2s - 6s
+        const delay = (Math.random() * 5).toFixed(1);        // trễ ngẫu nhiên
+        star.style.animationDuration = duration + "s";
+        star.style.animationDelay = delay + "s";
+
+        document.body.appendChild(star);
+      }
+    }
+
+    createStars(200);
+    setInterval(createHeart, 400);
+  </script>
+</body>
+</html>
